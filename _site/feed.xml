@@ -1,0 +1,1103 @@
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.8.5">Jekyll</generator><link href="http://localhost:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/" rel="alternate" type="text/html" /><updated>2019-02-12T14:50:34+08:00</updated><id>http://localhost:4000/feed.xml</id><title type="html">三齿桴</title><entry><title type="html">扩展vue的生命周期函数</title><link href="http://localhost:4000/frame/2018/12/26/%E6%89%A9%E5%B1%95vue%E7%94%9F%E5%91%BD%E5%91%A8%E6%9C%9F%E5%87%BD%E6%95%B0.html" rel="alternate" type="text/html" title="扩展vue的生命周期函数" /><published>2018-12-26T00:00:00+08:00</published><updated>2018-12-26T00:00:00+08:00</updated><id>http://localhost:4000/frame/2018/12/26/%E6%89%A9%E5%B1%95vue%E7%94%9F%E5%91%BD%E5%91%A8%E6%9C%9F%E5%87%BD%E6%95%B0</id><content type="html" xml:base="http://localhost:4000/frame/2018/12/26/%E6%89%A9%E5%B1%95vue%E7%94%9F%E5%91%BD%E5%91%A8%E6%9C%9F%E5%87%BD%E6%95%B0.html">&lt;h2 id=&quot;扩展在app中vue的生命周期函数&quot;&gt;扩展在App中vue的生命周期函数&lt;/h2&gt;
+
+&lt;h4 id=&quot;需求场景&quot;&gt;需求场景&lt;/h4&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;在App中有时需要用户点击后退的时候显示挽留弹窗&lt;/li&gt;
+  &lt;li&gt;需要在用户点击关闭或者后退的时候数据上报，数据上报完成后再关闭webview&lt;/li&gt;
+  &lt;li&gt;有些场景需要知道app退到后台&lt;/li&gt;
+  &lt;li&gt;有些场景需要知道webview 被显示到前台&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h4 id=&quot;目前实现&quot;&gt;目前实现&lt;/h4&gt;
+
+&lt;p&gt;众所周知上面所提到的这些能力需要原生支持，目前的方案是App通过jsbridge协议来提供此种能力，当某些业务有需要的时候主动调jsbridge来实现&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;此种方式有一些显而易见的问题&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;需要定义全局函数，将函数名称通过jsBridge给到端上&lt;/li&gt;
+  &lt;li&gt;业务中需要判断环境&lt;/li&gt;
+  &lt;li&gt;每个需要的页面都需要独立的调用jsbridge，多个页面需要这个功能的话需要调用多次&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h4 id=&quot;更好的实现方案&quot;&gt;更好的实现方案&lt;/h4&gt;
+
+&lt;p&gt;本质上用户点击后退、关闭、退到后台、显示到前台都是事件，如果将这些事件扩展为vue的生命周期函数，则在写业务的时候&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;不用关心与app的交互&lt;/li&gt;
+  &lt;li&gt;不用显式的调用jsBridge&lt;/li&gt;
+  &lt;li&gt;全局所有业务均会生效，不用写重复的逻辑&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h4 id=&quot;思路提供的能力&quot;&gt;思路&amp;amp;提供的能力&lt;/h4&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;扩展vue生命周期函数，提供与原生生命周期无差别的钩子函数执行环境&lt;/li&gt;
+  &lt;li&gt;维护父子组件对应的触发顺序&lt;/li&gt;
+  &lt;li&gt;钩子函数执行完毕自动触发app默认事件&lt;/li&gt;
+  &lt;li&gt;对于异步事件，提供阻止执行默认事件的能力，next提供继续执行的能力&lt;/li&gt;
+  &lt;li&gt;提供阻止事件冒泡的方法&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h4 id=&quot;使用文档&quot;&gt;使用文档&lt;/h4&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;前置依赖vue router，只有引入vue router的当前激活路由上生效，如果是嵌套路由则子路由先生效&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;table&gt;
+  &lt;thead&gt;
+    &lt;tr&gt;
+      &lt;th&gt;扩展生命周期函数&lt;/th&gt;
+      &lt;th&gt;执行时机&lt;/th&gt;
+      &lt;th&gt;this&lt;/th&gt;
+      &lt;th&gt;next[function]&lt;/th&gt;
+      &lt;th&gt;e [object]&lt;/th&gt;
+    &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+    &lt;tr&gt;
+      &lt;td&gt;appBack&lt;/td&gt;
+      &lt;td&gt;app后退按钮点击&lt;/td&gt;
+      &lt;td&gt;vm 实例&lt;/td&gt;
+      &lt;td&gt;执行点击后退的默认行为&lt;/td&gt;
+      &lt;td&gt;当前事件对象&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;appClose&lt;/td&gt;
+      &lt;td&gt;app关闭按钮点击&lt;/td&gt;
+      &lt;td&gt;vm 实例&lt;/td&gt;
+      &lt;td&gt;执行点击关闭的默认行为&lt;/td&gt;
+      &lt;td&gt;当前事件对象&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;appPause&lt;/td&gt;
+      &lt;td&gt;webview进入后台&lt;/td&gt;
+      &lt;td&gt;vm 实例&lt;/td&gt;
+      &lt;td&gt;无作用&lt;/td&gt;
+      &lt;td&gt;当前事件对象&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;appResume&lt;/td&gt;
+      &lt;td&gt;webview显示到页面&lt;/td&gt;
+      &lt;td&gt;vm 实例&lt;/td&gt;
+      &lt;td&gt;无作用&lt;/td&gt;
+      &lt;td&gt;当前事件对象&lt;/td&gt;
+    &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+
+&lt;h5 id=&quot;e为当前事件对象e下挂载两个方法&quot;&gt;e为当前事件对象，e下挂载两个方法&lt;/h5&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;e.stopPropagation() //阻止事件被父路由捕获&lt;/li&gt;
+  &lt;li&gt;e.preventDefault() // 阻止默认行为，如果有默认行为的话&lt;/li&gt;
+  &lt;li&gt;return false // 可以阻止默认行为和冒泡&lt;/li&gt;
+  &lt;li&gt;异步事件处理完成后再调用next 继续默认行为&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;示例代码&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt; export default {
+    data() {
+      return {
+        name:'nextPage'
+      };
+    },
+    appBack(next,e){
+      // 此声明周期函数在app后退按钮被点击的时候执行
+
+      this.confirm({
+        title:'挽留弹窗',
+        text:'异步操作或者用户事件完成后执行next',
+        yes: next
+      })
+      e.preventDefault()
+       // or
+      return false
+    },
+    appClose(){
+      log('appClose',this.name)
+      // 如果业务逻辑需要执行同步代码则直接写业务逻辑不需要特殊处理
+    },
+    appPause(){
+      log('appPause',this.name)
+    },
+    appResume(){
+      log('appResume',this.name)
+    },
+    created() {
+
+    }
+    ...
+    }
+
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;实现代码&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;/**
+ * @功能名称: vue扩展生命周期钩子 appBack appClose
+ * @文件名称: vueHook
+ * @Date: 2018/12/26
+ * @Author: liux
+ */
+
+
+import registAppBack from '../jsBridge/registAppBack'
+import navigationBack from '../jsBridge/navigationBack'
+import registAppClose from '../jsBridge/registAppClose'
+import closeCurrentPage from '../jsBridge/closeCurrentPage'
+
+
+
+export  default  function  (router) {
+  // 用户点击后退
+  registAppBack(REGISTHOOK('appBack',appBack));
+  // 用户点击关闭
+  registAppClose(REGISTHOOK('appClose',closeCurrentPage))
+  // webview 进入后台
+  window.onPause = REGISTHOOK('appPause')
+  // webview 恢复
+  window.onResume = REGISTHOOK('appResume')
+  window.router = router
+  var rootKey = history.state &amp;amp;&amp;amp; history.state.key
+  var realReplaceState = history.replaceState;
+
+  document.addEventListener('DOMContentLoaded',function() {
+    rootKey = history.state &amp;amp;&amp;amp; history.state.key;
+  })
+  history.replaceState = function() {
+    setRootKey(arguments[0])
+    return realReplaceState.call(history,...arguments)
+  }
+  function setRootKey(state={key:null}) {
+    let key = history.state &amp;amp;&amp;amp; history.state.key;
+    if(rootKey === key){
+      rootKey = state.key
+    }
+  }
+  function appBack() {
+    let key = history.state &amp;amp;&amp;amp; history.state.key
+    if(rootKey === key){
+      navigationBack()
+    }else {
+      router.back()
+    }
+  }
+  function REGISTHOOK(name,next = function () {}) {
+    return function () {
+      var mvList = router.currentRoute &amp;amp;&amp;amp; router.currentRoute.matched;
+      if(!Array.isArray(mvList)){
+        return next();
+      }
+      mvList = mvList.slice().map((item)=&amp;gt;{
+        return item.instances &amp;amp;&amp;amp; item.instances.default
+      });
+      var check = mvList.some(vm=&amp;gt;{
+        var hook = vm &amp;amp;&amp;amp; vm.$options &amp;amp;&amp;amp; vm.$options[name];
+        if(typeof hook === 'function'){
+          return true
+        }else {
+          return false
+        }
+      })
+      if(!(mvList &amp;amp;&amp;amp; check)){
+        return next()
+      }
+      var appDefault =  true
+      mvList.reverse().some(item=&amp;gt;{
+        let hook = item &amp;amp;&amp;amp; item.$options &amp;amp;&amp;amp; item.$options[name];
+        if(typeof  hook === 'function'){
+          let prevent = true; // 执行默认事件
+          let stop = false; // 不阻止冒泡
+          appDefault = false;
+          let re = hook.call(item,next,{
+            stopPropagation: ()=&amp;gt;{
+              stop = true;
+            },
+            preventDefault:  ()=&amp;gt; {
+              prevent = false
+            }}) === false; // re: true -- 阻止默认事件，阻止冒泡
+          if(!re &amp;amp;&amp;amp; prevent){
+            next()
+          }
+          return re || stop
+        }else {
+          return false
+        }
+      })
+      if(appDefault){
+        next()
+      }
+    }
+  }
+}
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;</content><author><name></name></author><summary type="html">扩展在App中vue的生命周期函数</summary></entry><entry><title type="html">mock数据平台</title><link href="http://localhost:4000/frame/2018/07/12/mock%E6%95%B0%E6%8D%AE%E5%B9%B3%E5%8F%B0.html" rel="alternate" type="text/html" title="mock数据平台" /><published>2018-07-12T00:00:00+08:00</published><updated>2018-07-12T00:00:00+08:00</updated><id>http://localhost:4000/frame/2018/07/12/mock%E6%95%B0%E6%8D%AE%E5%B9%B3%E5%8F%B0</id><content type="html" xml:base="http://localhost:4000/frame/2018/07/12/mock%E6%95%B0%E6%8D%AE%E5%B9%B3%E5%8F%B0.html">&lt;h3 id=&quot;mock功能介绍&quot;&gt;mock功能介绍&lt;/h3&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;mock是一个数据接口模拟系统支持json格式数据模拟&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;提供创建仓库&lt;/li&gt;
+  &lt;li&gt;接口数据增删改查&lt;/li&gt;
+  &lt;li&gt;支持各种方法的请求&lt;/li&gt;
+  &lt;li&gt;支持跨域请求&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;内网地址：
+&lt;a href=&quot;http://172.19.15.251:3000/index.html&quot;&gt;http://172.19.15.251:3000/index.html&lt;/a&gt;&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;添加一个仓库，根据开发者或者项目&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/img/newStore.jpg&quot; alt=&quot;image&quot; /&gt;&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;新增接口&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/img/add.jpg&quot; alt=&quot;image&quot; /&gt;&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;接口名称或者数据需要修改的时候直接修改保存，支持api中的关键字过滤接口，多个关键字空格分割&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/img/edit.jpg&quot; alt=&quot;image&quot; /&gt;&lt;/p&gt;
+&lt;h4 id=&quot;使用&quot;&gt;使用：&lt;/h4&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;直接在代码中全路径调用&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt; this.post('http://172.19.15.251:你配置的端口/api/test').then(json=&amp;gt;{
+
+        })
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;通过配置webpack proxyTable，用相对路径调用&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/img/use.jpg&quot; alt=&quot;image&quot; /&gt;&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt; this.post('/api/test').then(json=&amp;gt;{
+
+        })
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h4 id=&quot;最后&quot;&gt;最后&lt;/h4&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;欢迎大家参与，或者提建议，issue，不合理的地方还望大神斧正😄&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;&lt;a href=&quot;https://github.com/lxcuso4/mock&quot;&gt;服务端&lt;/a&gt;&lt;/p&gt;</content><author><name></name></author><summary type="html">mock功能介绍</summary></entry><entry><title type="html">跨页面通信</title><link href="http://localhost:4000/frame/2018/06/24/%E8%B7%A8%E9%A1%B5%E9%9D%A2%E9%80%9A%E4%BF%A1.html" rel="alternate" type="text/html" title="跨页面通信" /><published>2018-06-24T00:00:00+08:00</published><updated>2018-06-24T00:00:00+08:00</updated><id>http://localhost:4000/frame/2018/06/24/%E8%B7%A8%E9%A1%B5%E9%9D%A2%E9%80%9A%E4%BF%A1</id><content type="html" xml:base="http://localhost:4000/frame/2018/06/24/%E8%B7%A8%E9%A1%B5%E9%9D%A2%E9%80%9A%E4%BF%A1.html">&lt;h3 id=&quot;外呼系统交互方式&quot;&gt;外呼系统交互方式&lt;/h3&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;外呼系统不支持多标签页使用，而业务需要在打开的多个table页打电话，所以需要跨页面交互，交互流程图&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;h4 id=&quot;storagejs-是一个跨页面通信的公共方法需要保证同域&quot;&gt;storage.js 是一个跨页面通信的公共方法（需要保证同域）&lt;/h4&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;设置自定义消息&lt;/li&gt;
+  &lt;li&gt;获取自定义消息&lt;/li&gt;
+  &lt;li&gt;监听对应转态改变&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;// A页面 设置定义消息的值
+// @params (key , value)
+// key: 为自定义事件名称
+// value: 可以是除function的所有类型
+
+  setStorage('callTEL', {
+                outCallNumber:outCallNumber,
+                disNumber: disNumber,
+            })
+
+// B页面 监听对应消息
+// @params (object, clean)
+// object 为事件handle
+// key(string)：对应的自定义事件名称
+// value(function): 监听到对应消息的处理函数，function实参是A页面对应key的value
+
+// clean (boolean): 执行完handle后是否清楚value，
+// 设置相同的值不会触发事件监听，如果要重复拨打电话需要传值为true
+   listener({
+            'callTEL': this.callTel.bind(this),
+            'setTEL': this.setTel.bind(this)
+        },true)
+
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;ps: listener不会监听到本页面setStorage的值，A页面的listener需要在B页面触发，（“页面”指的是浏览器的多窗口）&lt;/p&gt;
+&lt;/blockquote&gt;</content><author><name></name></author><summary type="html">外呼系统交互方式</summary></entry><entry><title type="html">前端业务组件化的实现</title><link href="http://localhost:4000/frame/2018/04/10/%E4%B8%9A%E5%8A%A1%E7%BB%84%E4%BB%B6%E5%8C%96-%E4%BA%8C.html" rel="alternate" type="text/html" title="前端业务组件化的实现" /><published>2018-04-10T00:00:00+08:00</published><updated>2018-04-10T00:00:00+08:00</updated><id>http://localhost:4000/frame/2018/04/10/%E4%B8%9A%E5%8A%A1%E7%BB%84%E4%BB%B6%E5%8C%96(%E4%BA%8C)</id><content type="html" xml:base="http://localhost:4000/frame/2018/04/10/%E4%B8%9A%E5%8A%A1%E7%BB%84%E4%BB%B6%E5%8C%96-%E4%BA%8C.html">&lt;h2 id=&quot;h5组件开发文档&quot;&gt;h5组件开发文档&lt;/h2&gt;
+
+&lt;p&gt;&lt;a href=&quot;http://note.youdao.com/noteshare?id=5f36f4d1db9e2d633437ca4dabdaa330&quot;&gt;组件设计思路&lt;/a&gt;&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;使用vue全家桶，需要对 &lt;a href=&quot;https://cn.vuejs.org/v2/guide/&quot;&gt;vue2.0&lt;/a&gt;、&lt;a href=&quot;https://router.vuejs.org/zh/&quot;&gt;vue-router2.0&lt;/a&gt;、&lt;a href=&quot;https://vuex.vuejs.org/zh/&quot;&gt;vuex&lt;/a&gt;（&lt;a href=&quot;https://vuex.vuejs.org/zh/guide/modules.html&quot;&gt;vuex module&lt;/a&gt;）有所了解。下面是具体实现细节&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;h3 id=&quot;1组件开发&quot;&gt;1.组件开发&lt;/h3&gt;
+
+&lt;h4 id=&quot;1-静态状态依赖在组件storejs-定义config使用vuex-modules隔离组件全局状态&quot;&gt;1. 静态状态依赖：在组件store.js 定义config，使用vuex modules隔离组件全局状态&lt;/h4&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;绑卡组件为例：&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;// 组件store 对象
+export default {
+  creditCard: { // creditCard 为组件命名空间，需要全局唯一，不能和其它组件同名
+    namespaced: true, // 组件都需要开启命名空间
+    state: {
+      creditCardList:[], // 组件级全局状态
+      config: { // config 静态配置项，在组件实例化的时候，业务调用方会通过extend此config覆盖默认配置
+        qa:{
+          41:'xxx',
+          ...
+        },
+            ...
+      }
+    },
+    mutations: {
+    // 定义组件mutations
+      creditCardList(state, payload){
+        ...
+      },
+    },
+    actions:{
+    // 定义组件actions
+      getCreditList({commit},{self}){
+       ...
+      },
+    },
+  }
+}
+
+// 组件对应入口.vue文件
+ import { createNamespacedHelpers } from 'vuex'
+  const {mapState ,mapGetters} = createNamespacedHelpers('your name spaced');
+
+  computed: {
+      ...mapState(['config']) // 导入config
+      }
+
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h4 id=&quot;2-组件动态状态依赖通过路由对象定义query接收业务调用的参数&quot;&gt;2. 组件动态状态依赖：通过路由对象定义query接收业务调用的参数&lt;/h4&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;路由传值&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;尽量使用此方法依赖动态状态，绑卡组件为例：&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;// 组件路由实例
+const routes = [
+  {
+    path: '/creditCardList',
+    name: 'creditCardList',
+    props: (route) =&amp;gt; ({query: route.query}),// 定义query接收业务调用时传来的依赖数据，query属性也可以是方法
+    component: creditCardList,
+  },
+  ...
+  ]
+
+  // 组件对应入口.vue文件
+   props:['query'],// 通过props接收
+
+
+ // 业务调用时传值
+  params = {
+            xyFrom: 'before_create_loan',
+            callback:(json)=&amp;gt;{
+              if(json.errcode === 0){
+                this.createLoan()
+              }
+            }
+          }
+ this.$router.push({name:'nucc',query: params})
+
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;vuex全局依赖&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;复杂业务组件通多vuex接收全局状态，尽量不要再组件中提交全局变更，组件内部全局状态维护在组件vuex store上&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;vue页面&lt;/p&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;import { mapState, mapActions } from 'vuex'
+
+computed: {
+      ...mapState('nucc',['config']), // 组件级状态
+      ...mapState(['base_info']), // 全局状态
+      }
+
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;如果要提交全局状态，通过commit或者dispatch提交全局状态，依赖的数据需要声明，此方法会在组件中强耦合业务全局状态和全局方法， 示例：&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;import { mapState, mapActions } from 'vuex'
+
+methods: {
+      ...mapActions('nucc', ['update']), // 组件级actions
+      ...mapActions( ['getBaseInfo']) // 全局actions
+    }
+
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h4 id=&quot;3-组件调用时的前置行为和后置行为&quot;&gt;3. 组件调用时的前置行为和后置行为&lt;/h4&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;业务调用时通过配置config定义 prestart poststart 在组件运行时执行业务自定义行为&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;示例：&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;// 业务config
+
+// 覆盖组件config
+Object.assign(nuccModule.nucc.state.config,{
+  poststart(json){ //  组件功能完成时执行，this为组件实例，json为组件功能结果
+    this.$route.query.callback(json)
+  }
+})
+
+// 组件执行时机
+
+前置：
+    init() {
+        this.getQuery();
+        if (this.config.prestart){
+          this.config.prestart.call(this)
+        }
+    }
+后置：
+      submit() {
+        var params = {
+          orderId: this.orderId,
+          verifyCode: this.smsCode
+        }
+        this.post('/h5/union/nucc_sign', params).then(json =&amp;gt; {
+          // 假设这个提交完成功后组件功能完成
+          if (this.config.poststart){
+           // 有poststart 的时候在组件实例上执行poststart,将结果传给poststart函数，并退出
+                return this.config.poststart.call(this,json);
+            }
+            ... // 执行默认逻辑
+
+        })
+
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h4 id=&quot;4-组件vuex-store数据固化&quot;&gt;4. 组件vuex store数据固化&lt;/h4&gt;
+
+&lt;p&gt;组件store.js 数据固化示例：&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;// 组件 store.js
+
+import {getSession,setSession} from 'bjxy-common/helper/session'
+const storage = store =&amp;gt; {
+  var session = getSession('userinfo');
+  if(session){
+    store.commit('identity/test', session)
+  }
+  var timer = null;
+  store.subscribe((mutation, state) =&amp;gt; {
+    if(mutation.type === 'identity/test'){
+      if(timer){
+        clearTimeout(timer);
+      }
+      timer = setTimeout(function() {
+        setSession('userinfo',state.identity.data)
+      },50)
+    }
+  })
+}
+var store =  {
+  identity: {
+    namespaced: true,
+    state: {
+      config: {
+        //  ...
+      },
+      data:{a:123}
+    },
+    mutations:{
+      test(state,payload){
+        state.data = payload
+      },
+    },
+  },
+}
+var plugins = [storage]
+export {store, plugins}
+
+
+// 组件index.js
+
+import routes from './routes'
+import {store, plugins }from './store'
+export {routes,store,plugins}
+
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;业务接入示例：&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;import {store as identityStore, plugins as identityPlugins} from '../src'
+
+Object.assign(identityStore.identity.state.config,{
+  poststart(json){
+    this.alert(JSON.stringify(json))
+  },
+})
+
+export default {
+  state:{
+    baseHost:'http://172.19.15.251:8091',
+  },
+  modules: identityStore,
+  plugins: [].concat(identityPlugins)
+};
+
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;除了以上方式的依赖和交互外，组件功能是内聚的&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;h3 id=&quot;2-组件导出&quot;&gt;2. 组件导出&lt;/h3&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;组件通过提供一个store选项 和 route 选项，以及可选的plugins 导出组件
+    &lt;ul&gt;
+      &lt;li&gt;store 通过vuex module隔离全局状态，提供一个组件级别的全局状态，每个组件需要一个命名空间，保证区别于其他组件&lt;/li&gt;
+      &lt;li&gt;route 定义一级路由名称需要使用组件命名空间，避免全局冲突&lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;//  可以通过定义index.js 将其导出
+
+import creditCardRoutes from './routes'
+import creditCardStore from './store'
+export {creditCardRoutes,creditCardStore}
+
+// routes.js 组件路由
+
+const bankList = (r) =&amp;gt; require(['./bankList.vue'], r);
+const bindCreditCard = (r) =&amp;gt; require(['./bindCreditCard.vue'], r);
+const creditCardList = (r) =&amp;gt; require(['./creditCardList.vue'], r);
+const iframe = (r) =&amp;gt; require(['component/iframe'], r);
+
+const routes = [
+  {
+    path: '/creditCardList',
+    name: 'creditCardList',
+    props: (route) =&amp;gt; ({query: route.query}),
+    component: creditCardList,
+  },
+  {
+    path: '/bindCreditCard/',
+    name: 'bindCreditCard',
+    component: bindCreditCard,
+    props: (route) =&amp;gt; ({query: route.query}),
+    children: [
+      {
+        name: 'bankList',
+        path: 'bankList',
+        component: bankList,
+      },
+    ],
+  },
+  {
+    path: '/iframe',
+    name: 'iframe',
+    component: iframe,
+    props: (route) =&amp;gt; ({query: route.query}),
+  },
+
+];
+export default routes;
+
+
+//  store.js  组件状态
+
+
+
+export default {
+  creditCard: {
+    namespaced: true,
+    state: {
+      creditCardList:[],
+      config: {
+        qa:{
+          41:'/1.0/page/qa#41',
+          24:'/1.0/page/qa#24'
+        },
+        tip:{
+          text1:'xxx',
+          button2:'我知道了',
+          text2:'xxx',
+          button2:'查看解决办法'
+        },
+        creditCardList:{},
+        bindCreditCard:{}
+      }
+    },
+    mutations: {
+      creditCardList(state, payload){
+        state.creditCardList = payload
+      },
+    },
+    actions:{
+      getCreditList({commit},{self}){
+        return self.post('/h5/my/get_credit_cardlist').then(json=&amp;gt;{
+         commit('creditCardList',json.data || [])
+          return json
+        },json=&amp;gt;{
+          self.toast(json.errstr)
+        })
+      },
+    },
+  }
+}
+
+
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h3 id=&quot;3-组件实例化&quot;&gt;3. 组件实例化&lt;/h3&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;组件需要实例化后使用，可以单组件实例化或者和其它组件集成实例化&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;单组件实例化&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;
+// 业务实例store
+import {nuccStore} from 'component/nuccSign' // 导入组件store
+
+import getAppInfo from 'common/helper/getAppInfo'
+var nuccConfig = {};
+if(getAppInfo().app){
+  nuccConfig = {
+    tip:{
+      success:{
+        text:'您已完成签约，请点击返回按钮继续操作',
+      },
+      ...
+    }
+  }
+}
+Object.assign(nuccStore.nucc.state.config,nuccConfig); // 覆盖默认配置
+export default {
+  modules: nuccStore
+};
+
+---------------------------------------------
+// 业务实例routes
+
+import Vue from 'vue';
+import Router from 'vue-router';
+import {nuccRoutes} from 'component/nuccSign' // 导入组件路由
+
+const router = {
+    // 合并路由
+  routes: nuccRoutes.concat([
+    {path: '/**', redirect: '/nucc'}
+  ])
+}
+
+Vue.use(Router);
+    // 导出路由实例
+export default new Router(router);
+
+
+---------------------------------------------
+// 业务入口index.js
+
+
+
+import router from './router'; // 业务路由实例
+
+import pageStore from './store'; // 业务数据选项对象
+
+let store = baseStore(pageStore); // store 实例化
+
+
+// 业务vue初始化
+rootApp = new Vue({
+  el: '#app',
+  router,
+  store,
+});
+
+
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;集成到其它项目&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;import unique from 'common/helper/unique'
+import {nuccRoutes} from 'component/nuccSign' 组件A路由对象
+import {creditCardRoutes} from  'component/creditCard' 组件B路由对象
+
+var routes = [
+    {
+      path: '/',
+      name: 'main',
+      component: main,
+    },
+   ...
+  ]; // 业务路由对象
+
+//  合并路由对象
+routes = routes.concat(nucc,creditCardRoutes,[{path: '/**', redirect: '/'}]);
+
+routes = unique(routes,'path') // 去重，不同组件可能有公共一级路由，iframe等，保留一个就行，其实不去重也行，一个warning...
+
+Vue.use(Router);
+// 导出
+export default new Router({
+  routes
+});
+
+
+---------------------------------------------
+// 业务实例routes
+import {nuccModule} from 'component/nuccSign'
+import {creditCardStore} from 'component/creditCard'
+
+// 覆盖对应配置
+Object.assign(nuccModule.nucc.state.config,{
+  poststart(json){
+    this.$route.query.callback(json)
+  }
+})
+
+Object.assign(creditCardStore.creditCard.state.config,{
+  creditCardList:{
+    poststart(json){
+      this.dispatch('creditCard',json)
+      this.$router.go(-1)
+    }
+  }
+})
+
+// 导出
+export default {
+  state: {},
+  mutations: {},
+  actions:{}，
+  plugins:[],
+  modules: Object.assign({}, nuccModule, creditCardStore)// 将组件store作为 业务modules
+  }
+
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;</content><author><name></name></author><summary type="html">h5组件开发文档</summary></entry><entry><title type="html">前端业务组件化的思考</title><link href="http://localhost:4000/frame/2018/03/18/%E4%B8%9A%E5%8A%A1%E7%BB%84%E4%BB%B6%E5%8C%96-%E4%B8%80.html" rel="alternate" type="text/html" title="前端业务组件化的思考" /><published>2018-03-18T00:00:00+08:00</published><updated>2018-03-18T00:00:00+08:00</updated><id>http://localhost:4000/frame/2018/03/18/%E4%B8%9A%E5%8A%A1%E7%BB%84%E4%BB%B6%E5%8C%96(%E4%B8%80)</id><content type="html" xml:base="http://localhost:4000/frame/2018/03/18/%E4%B8%9A%E5%8A%A1%E7%BB%84%E4%BB%B6%E5%8C%96-%E4%B8%80.html">&lt;h3 id=&quot;前端业务组件分享&quot;&gt;前端业务组件分享&lt;/h3&gt;
+
+&lt;h4 id=&quot;为什么要业务组件化&quot;&gt;为什么要业务组件化&lt;/h4&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;一套代码多业务线，多端使用&lt;/li&gt;
+  &lt;li&gt;一次修改全部生效&lt;/li&gt;
+  &lt;li&gt;灵活的组件组织方式&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h4 id=&quot;如何业务组件化&quot;&gt;如何业务组件化&lt;/h4&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;使用框架 Vue、 Vuex、 Vue-Router&lt;/li&gt;
+  &lt;li&gt;按照一定规范和方式开发组件&lt;/li&gt;
+  &lt;li&gt;不论是在单页或者多页中使用按照同样的方式实例化业务组件&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h4 id=&quot;组件化需要解决的问题&quot;&gt;组件化需要解决的问题&lt;/h4&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;全局变量冲突（组件内部的全局状态和业务实例全局状态）&lt;/li&gt;
+  &lt;li&gt;全局路由冲突（组件内部路由和业务实例路由）&lt;/li&gt;
+  &lt;li&gt;不同场景、业务线，logo、文案、样式不同（静态依赖）&lt;/li&gt;
+  &lt;li&gt;状态依赖（运行时依赖）
+    &lt;ul&gt;
+      &lt;li&gt;router跳转的时候&lt;/li&gt;
+      &lt;li&gt;全局vuex 依赖&lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/li&gt;
+  &lt;li&gt;初始化动作
+    &lt;ul&gt;
+      &lt;li&gt;初始化时候需要执行的额外动作&lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/li&gt;
+  &lt;li&gt;完成后状态导出
+    &lt;ul&gt;
+      &lt;li&gt;postinstall&lt;/li&gt;
+      &lt;li&gt;全局mutation&lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/li&gt;
+  &lt;li&gt;完成后动作&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;h4 id=&quot;组件化架构方式&quot;&gt;组件化架构方式&lt;/h4&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;使用vuex module 隔离组件全局状态和业务实例全局状态&lt;/li&gt;
+  &lt;li&gt;顶级路由命名需要保证其命名空间，不能起通用路由名称&lt;/li&gt;
+  &lt;li&gt;静态依赖通过在业务实例化的时候传入congfig，组件内部需要在有区别的地方,做判断&lt;/li&gt;
+  &lt;li&gt;实例化业务组件的时候，组件依赖通过router跳转的时候加参数传递给组件组件在内部接收；
+业务公共base_info也可以直接vuex依赖顶层业务状态，组件自述需要声明&lt;/li&gt;
+  &lt;li&gt;组件初始化后需要执行的动作，通过在congfig中传入startinstall在组件初始化的时候执行&lt;/li&gt;
+  &lt;li&gt;完成后状态导出
+    &lt;ul&gt;
+      &lt;li&gt;通过在congfig中传入postinstall在组件功能完成后执行，this绑定到组件实例，组件完成后结果作为参数postinstall参数；&lt;/li&gt;
+      &lt;li&gt;全流程的大项目中也可以通过提交全局mutation，更新全局依赖&lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/li&gt;
+  &lt;li&gt;通过在congfig中传入postinstall在组件功能完成后执行&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;h4 id=&quot;组件对外提供接口&quot;&gt;组件对外提供接口&lt;/h4&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;对外提供一个或多个route选项对象&lt;/li&gt;
+  &lt;li&gt;对外提供一个store选项对象&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;路由：业务实例化的时候通过引入组件route然后和自有route拼装后实例化来引入组件&lt;/p&gt;
+
+&lt;p&gt;store：通过引入组件store然后合并到业务modules然后实例化引入组件store&lt;/p&gt;
+
+&lt;h4 id=&quot;一些问题&quot;&gt;一些问题&lt;/h4&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;目前组件都在compont仓库，所以业务引用的时候，业务引用A组件的老版本，B组件更新了，业务因为要更新B导致A也引用到最新的了&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;不同业务组件用一个独立的仓库，业务在引用的时候可以保证其引用版本不变&lt;/li&gt;
+&lt;/ul&gt;</content><author><name></name></author><summary type="html">前端业务组件分享</summary></entry><entry><title type="html">数组相邻和最大</title><link href="http://localhost:4000/algorithm/2017/04/12/%E6%95%B0%E7%BB%84%E7%9B%B8%E9%82%BB%E6%9C%80%E5%A4%A7.html" rel="alternate" type="text/html" title="数组相邻和最大" /><published>2017-04-12T00:00:00+08:00</published><updated>2017-04-12T00:00:00+08:00</updated><id>http://localhost:4000/algorithm/2017/04/12/%E6%95%B0%E7%BB%84%E7%9B%B8%E9%82%BB%E6%9C%80%E5%A4%A7</id><content type="html" xml:base="http://localhost:4000/algorithm/2017/04/12/%E6%95%B0%E7%BB%84%E7%9B%B8%E9%82%BB%E6%9C%80%E5%A4%A7.html">&lt;h3 id=&quot;数组相邻和最大&quot;&gt;数组相邻和最大&lt;/h3&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;求数组相邻元素之和最大&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;    function max(arr) {
+      var resulf = 0
+      loop(arr);
+      return resulf;
+      function loop(subArr) {
+        var current = 0;
+        subArr.forEach((item)=&amp;gt;{
+          current += item;
+          if (current &amp;gt; resulf){
+            resulf = current;
+          }
+        })
+        if(subArr.length == 1) return;
+        subArr.shift()
+        loop(subArr)
+      }
+    }
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h3 id=&quot;数组分组&quot;&gt;数组分组&lt;/h3&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;将数组按照给定长度分割为新的数组列表[].group(size)&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;[1,2,3,4].group(3) //[[1,2,3],[4]]&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;Array.prototype.group = function (size = 1) {
+  let count = Math.ceil(this.length / size);
+  let result = [];
+  for (var i = 0; i &amp;lt; count; i++) {
+    let start = i * size;
+    result.push(this.slice(start, start + size));
+  }
+  return result;
+}
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h3 id=&quot;连续调用函数&quot;&gt;连续调用函数&lt;/h3&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;如何实现一个函数当一次调用的时候返回arguments 之和，再次调用的时候继续计算,如：add(1,1)返回2，add(1,1)(1)返回3  …&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;  function add() {
+      var arg = [...arguments];
+      function fn() {
+        arg = arg.concat([...arguments]);
+        return fn
+      }
+      fn.valueOf = function () {
+        return arg.reduce((a,b)=&amp;gt;{
+          return a+b
+        })
+      };
+      return fn
+    }
+   add(1,2)(3)
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;</content><author><name></name></author><summary type="html">数组相邻和最大</summary></entry><entry><title type="html">三阶幻方</title><link href="http://localhost:4000/algorithm/2017/03/01/%E4%B8%89%E9%98%B6%E5%B9%BB%E6%96%B9.html" rel="alternate" type="text/html" title="三阶幻方" /><published>2017-03-01T00:00:00+08:00</published><updated>2017-03-01T00:00:00+08:00</updated><id>http://localhost:4000/algorithm/2017/03/01/%E4%B8%89%E9%98%B6%E5%B9%BB%E6%96%B9</id><content type="html" xml:base="http://localhost:4000/algorithm/2017/03/01/%E4%B8%89%E9%98%B6%E5%B9%BB%E6%96%B9.html">&lt;h3 id=&quot;三阶幻方&quot;&gt;三阶幻方&lt;/h3&gt;
+&lt;blockquote&gt;
+  &lt;p&gt;将1~9这9个不同整数填入一个3×3的表格，使得每行、每列以及每条对角线上的数字之和相同。&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;穷举所有排列组合，找到合适的解&lt;/li&gt;
+  &lt;li&gt;算法的关键在于穷举所有排列组合，相当于列举9！的排列组合找到满足的解&lt;/li&gt;
+  &lt;li&gt;找到8组解互为对称解&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;var log = console.log.bind(console);
+
+  function magicSquare(arr) {
+    let result = [], current = [], count = arr.length, layer = Math.sqrt(count);
+    loop(arr);
+    return result
+    function loop(a) {
+      a.forEach((item, index) =&amp;gt; {
+        current[count - a.length] = item;
+        if (a.length &amp;gt; 1) {
+          let next = a.slice();
+          next.splice(index, 1)
+          loop(next)
+        } else {
+          let re = current.slice();
+          if (is(re)) {
+            result.push(re.group(layer))
+          }
+        }
+      })
+    }
+
+    function is(a) {
+      var layer = Math.sqrt(a.length);
+      var row = Array(layer).fill(0), col = Array(layer).fill(0), skim = 0, press = 0;
+      a.forEach((item, index) =&amp;gt; {
+        row[Math.floor(index / layer)] += item;//每行和
+        col[index % layer] += item;//每列和
+        let currentlayer = Math.floor(index / layer);
+        if (index % (layer + 1) == 0) {
+          skim += item;
+        }
+        if (index == ((currentlayer + 1) * layer - (currentlayer + 1))) {
+          press += item
+        }
+      })
+      col.push(skim, press)
+      return row.concat(col).every((item) =&amp;gt; {
+        return item == skim
+      })
+    }
+  }
+  var re = magicSquare([1, 2, 3, 4, 5, 6, 7, 8, 9]);
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;</content><author><name></name></author><summary type="html">三阶幻方 将1~9这9个不同整数填入一个3×3的表格，使得每行、每列以及每条对角线上的数字之和相同。</summary></entry><entry><title type="html">穷举排列</title><link href="http://localhost:4000/algorithm/2017/02/18/%E7%A9%B7%E4%B8%BE%E6%8E%92%E5%88%97.html" rel="alternate" type="text/html" title="穷举排列" /><published>2017-02-18T00:00:00+08:00</published><updated>2017-02-18T00:00:00+08:00</updated><id>http://localhost:4000/algorithm/2017/02/18/%E7%A9%B7%E4%B8%BE%E6%8E%92%E5%88%97</id><content type="html" xml:base="http://localhost:4000/algorithm/2017/02/18/%E7%A9%B7%E4%B8%BE%E6%8E%92%E5%88%97.html">&lt;h3 id=&quot;穷举排列&quot;&gt;穷举排列&lt;/h3&gt;
+&lt;blockquote&gt;
+  &lt;p&gt;将数组中的元素排列组合&lt;/p&gt;
+  &lt;h5 id=&quot;问题分析&quot;&gt;问题分析&lt;/h5&gt;
+  &lt;ul&gt;
+    &lt;li&gt;此问题和 N 皇后问题如出一辙，都是对 n 个元素进行排列组合，从中过滤出符合条件的排列&lt;/li&gt;
+    &lt;li&gt;等价于将 length 个相同的数组排列组合，列号不能重复&lt;/li&gt;
+  &lt;/ul&gt;
+&lt;/blockquote&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;function getPermutations(arr) {
+      var resulf =[];
+      var current = [];
+      function loop(a) {
+        a.forEach((item)=&amp;gt;{
+          current[arr.length - a.length] = item;
+          if (a.length&amp;gt;1){
+            loop(a.filter((i)=&amp;gt;{
+              return i !== item
+            }))
+          }else {
+            resulf.push(current.slice());
+          }
+        })
+      }
+      loop(arr)
+      return resulf;
+    }
+    log(getPermutations(['a','b','c','d']))
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;</content><author><name></name></author><summary type="html">穷举排列 将数组中的元素排列组合 问题分析 此问题和 N 皇后问题如出一辙，都是对 n 个元素进行排列组合，从中过滤出符合条件的排列 等价于将 length 个相同的数组排列组合，列号不能重复</summary></entry><entry><title type="html">N皇后问题</title><link href="http://localhost:4000/algorithm/2017/02/17/N%E7%9A%87%E5%90%8E%E9%97%AE%E9%A2%98.html" rel="alternate" type="text/html" title="N皇后问题" /><published>2017-02-17T00:00:00+08:00</published><updated>2017-02-17T00:00:00+08:00</updated><id>http://localhost:4000/algorithm/2017/02/17/N%E7%9A%87%E5%90%8E%E9%97%AE%E9%A2%98</id><content type="html" xml:base="http://localhost:4000/algorithm/2017/02/17/N%E7%9A%87%E5%90%8E%E9%97%AE%E9%A2%98.html">&lt;h3 id=&quot;n皇后问题&quot;&gt;N皇后问题&lt;/h3&gt;
+&lt;blockquote&gt;
+  &lt;p&gt;n*n的棋盘不在同一行，列，撇，捺，的摆法&lt;/p&gt;
+  &lt;h5 id=&quot;问题分析&quot;&gt;问题分析&lt;/h5&gt;
+  &lt;ul&gt;
+    &lt;li&gt;每行只有一个点&lt;/li&gt;
+    &lt;li&gt;遍历每行一个点的所有组合&lt;/li&gt;
+    &lt;li&gt;帅选出符合条件的组&lt;/li&gt;
+  &lt;/ul&gt;
+&lt;/blockquote&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;function queen(layer) {
+    var current = [], resulf = [];
+    !function loop(row) {
+      for (let col = 0; col &amp;lt; layer; col++) {
+        current.length = row + 1;
+        if (current.some((item) =&amp;gt; {
+            return item.mark[row + ',' + col] || item.mark[&quot;*,&quot; + col] || false
+          })) {
+          continue;
+        }
+        current[row] = {dot: row + ',' + col, mark: getMark(row, col)}
+        if ((1 + row) &amp;lt; layer) {
+          loop(row + 1)
+        } else {
+          resulf.push(current.map((item)=&amp;gt;{
+            return item.dot
+          }))
+        }
+      }
+    }(0);
+    return resulf;
+    function getMark(row, col) {
+      var mark = {},
+        i = layer - row,
+        y1 = row,
+        x1 = col,
+        y2 = row,
+        x2 = col;
+      mark[&quot;*,&quot; + col] = true;
+      while (i--) {
+        mark[`${y1++},${x1++}`] = true;
+        mark[`${y2++},${x2--}`] = true;
+      }
+      return mark
+    }
+  }
+
+  console.time('t1');
+  log(queen(4));
+  console.timeEnd(&quot;t1&quot;);
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;</content><author><name></name></author><summary type="html">N皇后问题 n*n的棋盘不在同一行，列，撇，捺，的摆法 问题分析 每行只有一个点 遍历每行一个点的所有组合 帅选出符合条件的组</summary></entry></feed>
