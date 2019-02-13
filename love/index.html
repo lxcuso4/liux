@@ -1,0 +1,120 @@
+---
+layout: index
+title: 小郭仔
+---
+<head>
+
+	<style>
+		@font-face {
+			font-family: 'myFont';
+			src: url('./wenjing.ttf');
+		}
+		body{
+			margin:0;padding:0;background:#ffe;
+			font-size:16px;overflow:auto;box-sizing: border-box;
+			font-family: 'myFont';
+		}
+
+		#mainDiv{width:100%;overflow: hidden}
+		#loveHeart{width:100%;position: relative;}
+		#words{
+			width:50%;font-size:18px;color:#666;position: absolute;
+			top:45%;left: 50%;transform: translate(-50%,-50%);padding-right: 5%;
+			-webkit-transform: translate(-50%,-50%);
+			-ms-transform: translate(-50%,-50%);
+		}
+		#garden{width:100%;}
+		#messages{display:none;}
+		#messages p{
+			text-align: right;
+			margin: 2px;
+		}
+		#loveu{padding:5px;text-align:right;margin-top: 5%;visibility:hidden}
+		#loveu .signature{font-style:italic}
+		#code{
+			padding: 20px;
+			min-height: 280px;
+			color:#333;
+			line-height: 130%;
+			opacity: 0;
+		}
+		#code .keyword{color:#7f0055;font-weight:bold}
+		#code .comments{color:#3f7f5f}
+		#copyright a{color:#666}
+		@media screen and (min-width: 751px) {
+			#content{
+				display: flex;
+				margin: 20px 50px 0;
+			}
+			#code{
+				padding: 20px;
+				width: 400px;
+				flex: 2;
+				margin-left: 30px;
+				margin-top: 20px;
+				font-size: 20px;
+				line-height: 130%;
+			}
+			#loveHeart{
+				flex: 3;
+			}
+			#words{
+				font-size: 22px;
+				top: 45%;
+			}
+			#loveu{
+				font-size: 20px;
+			}
+		}
+	</style>
+</head>
+
+<body>
+<div id="mainDiv">
+	<div id="content" >
+		<div id="code" >
+			<span class="comments">// Fall in love river. </span><br>
+			The boy love the girl.<br>
+			<span class="comments">// They love each other.</span><br>
+			The girl loved the boy.<br>
+			<span class="comments">// AS time goes on.</span><br>
+			The boy can not be separated the girl.<br>
+			<span class="comments">// At the same time.</span><br>
+			The girl can not be separated the boy.<br>
+			<span class="comments">// One day, the boy made the girl sad.</span><br>
+			The girl was very sad.<br>
+			<span class="comments">// The boy was at a loss.</span><br>
+			Girls think boys don't love her anymore.<br>
+			<span class="comments">//The girl turned and left.</span><br>
+			The boy was very sad.<br>
+			<span class="comments">//Boys don't know how to express themselves.</span><br>
+			<span class="keyword">But </span> the boy <span class="keyword">never gave up.</span><br>
+			<span><span class="comments">// He hoped that the girl would forgive him.</span><br>
+			<span>He's willing to give everything for it.<br>
+			<span class="keyword">Because </span> you are <span class="keyword">my dream.</span><br>
+				<br>
+			Boy name: <span class="keyword">Mr</span> 笨拙的小刘<br>
+			Girl name: <span class="keyword">Mrs</span> 美少女小郭仔<br>
+			<br>
+			I want to say:<br>
+				Baby, <span class="keyword">I love you forever.</span><br>
+		</span></span></div>
+		<div id="loveHeart">
+			<canvas id="garden"></canvas>
+			<div id="words">
+				<div id="messages">
+					小宝贝，情人节快乐！
+					<p>永远爱你</p>
+				</div>
+				<div id="loveu">
+					<div class="signature">--- 笨拙的小刘</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+<script type="text/javascript" src="./jquery.js"></script>
+<script type="text/javascript" src="./garden.js"></script>
+<script type="text/javascript" src="./functions.js"></script>
+
+</body>
