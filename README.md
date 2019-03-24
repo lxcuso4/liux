@@ -1,2 +1,1 @@
-# liux
-GitHub Pages
+liux's blog

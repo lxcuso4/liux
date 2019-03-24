@@ -1,0 +1,149 @@
+
+.hljs {
+  white-space: pre;
+  word-wrap: normal;
+  overflow-x: auto;
+  background: #e8f2fb;
+  .hljs-keyword,.hljs-title{
+    font-weight: bold;
+  }
+}
+.highlight{
+  font-family: "SFMono-Regular", Menlo, 'Roboto Mono', Monaco, courier, monospace;
+  font-size: .9em;
+  font-weight: normal;
+  line-height :1.6em;
+  overflow-x: auto;
+  pre{
+   padding: 12px 20px;
+    background: #e8f2fb;
+    border-radius: 3px;
+  }
+}
+.highlighter-rouge{
+  color: #bd4147;
+  background-color: #e8f2fb;
+}
+.md {
+  font-size: 15px;
+  color: #333;
+  line-height :1.7em;
+  h1, h2, h3, h4 {
+    font-weight: bold;
+    color: #333;
+    margin-left: -3px;
+    line-height :1.6em;
+}
+  img{
+    max-width :100%;
+    display: block;
+    margin: 0 auto;
+}
+
+  hr {
+    border: 0;
+    background-color: #eee;
+    height: 1px;
+    margin: 16px 0;
+}
+
+  h1 {
+    font-size: 30px;
+    border-bottom: #eee 1px solid;
+    padding-bottom: 8px;
+}
+  h2 {
+    font-size: 24px;
+    border-bottom: #eee 1px solid;
+    padding-bottom: 8px;
+    margin-bottom :30px;
+    padding-top :30px;
+}
+  h3 {
+    font-size: 18px;
+    padding : 10px 0;
+}
+  h4 {
+    font-size: 16px;
+}
+  blockquote {
+    padding: 16px 10px 16px 24px;
+    margin: 24px 0px;
+    font-size: 16px;
+    font-weight :normal;
+    border-left: solid 4px #009688;
+    p {
+      color: #6e6e6e;
+      margin: 0;
+  }
+}
+  @media screen and (max-width: 900px){
+  blockquote {
+    padding: 8px 10px 8px 15px;
+    font-size :14px;
+}
+}
+
+  pre {
+    position: relative;
+    white-space: pre;
+    display: block;
+
+    code{
+      white-space: pre;
+      color: rgb(52, 73, 94);
+      font-weight :normal !important;
+      line-height: 1.6em;
+      font-size : 14px;
+  }
+}
+
+  code, kbd {
+
+    -webkit-font-smoothing: initial;
+    padding: 0 2px;
+    color: #bd4147;
+    border-radius: 3px;
+    white-space: pre-wrap;
+}
+
+  code:after, code:before, kbd:after, kbd:before {
+    content: "" !important;
+}
+  table {
+    margin: 20px 0;
+    overflow :auto;
+    border-collapse: collapse;
+}
+  th {
+    border: #ccc 1px solid;
+    text-align: left;
+    background: #eee;
+    padding: 8px 12px;
+    white-space: nowrap;
+}
+  td {
+    border: #ccc 1px solid;
+    padding: 8px 12px;
+}
+  tr:nth-child(even) {
+    background-color: #f6f6f6
+}
+  @media screen and (max-width: 600px) {
+  blockquote {
+    padding: 8px 10px 8px 15px;
+    font-size: 14px;
+}
+  table{
+    display:block;
+}
+  pre{
+    padding: 12px;
+    code{
+      font-size : 12px;
+  }
+}
+}
+
+}
+

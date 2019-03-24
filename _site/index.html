@@ -1,35 +1,56 @@
+
 <!DOCTYPE html>
-<html lang="zh"><head>
-  <meta charset="utf-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="shortcut icon" type="image/png" href="/assets/img/favicon.png"><!-- Begin Jekyll SEO tag v2.5.0 -->
-<title>三齿桴</title>
-<meta name="generator" content="Jekyll v3.8.5" />
+<html lang="zh-CN">
+<head>
+
+    <meta charset="utf-8">
+    <meta http-equiv=X-UA-Compatible content="IE=edge,chrome=1">
+    <meta name=viewport content="width=device-width, initial-scale=1">
+
+    <meta name=description content="hi, I am clumsy liux">
+    <meta name=author content="三齿桴">
+
+
+    <!-- Begin Jekyll SEO tag v2.5.0 -->
+<title>三齿桴 | A blog about technology and stuff related</title>
+<meta name="generator" content="Jekyll v3.7.4" />
 <meta property="og:title" content="三齿桴" />
 <meta property="og:locale" content="en_US" />
+<meta name="description" content="A blog about technology and stuff related" />
+<meta property="og:description" content="A blog about technology and stuff related" />
 <link rel="canonical" href="http://localhost:4000/" />
 <meta property="og:url" content="http://localhost:4000/" />
 <meta property="og:site_name" content="三齿桴" />
 <script type="application/ld+json">
-{"url":"http://localhost:4000/","headline":"三齿桴","name":"三齿桴","@type":"WebSite","@context":"http://schema.org"}</script>
+{"url":"http://localhost:4000/","name":"三齿桴","description":"A blog about technology and stuff related","@type":"WebSite","headline":"三齿桴","@context":"http://schema.org"}</script>
 <!-- End Jekyll SEO tag -->
-<link rel="stylesheet" href="/assets/main.css"><link type="application/atom+xml" rel="alternate" href="http://localhost:4000/feed.xml" title="三齿桴" /></head>
+
+
+    
+<link rel="icon" type="image/png" href="http://localhost:4000/assets/images/favicon.png" sizes="128x128" />
+
+
+
+    <link rel="canonical" href="http://localhost:4000/">
+
+
+</head>
 <head>
- <style>
+ <style >
         html,
         body {
             overflow: hidden;
             margin: 0;
+            width: 100%;
         }
 
         body {
             font-family: 'Open Sans', 'Helvetica Neue', 'Hiragino Sans GB', 'LiHei Pro', Arial, sans-serif;
             color: #333;
-            font-size: 14px;
         }
 
         #wrapper {
+            width: 125px;
             position: absolute;
             text-align: center;
             top: 40%;
@@ -92,14 +113,25 @@
         #wrapper>p>a:hover {
             color: #50b97d;
         }
+        #wrapper .head img{
+            width: 125px;
+            margin: 0 auto 25px;
+            border-radius: 100%;
+            transition: all 0.2s;
+            opacity: 1;
+        }
 
     </style>
 </head>
 <body>
 <div id="wrapper">
+    <div class="head">
+        <img class="selfie" alt="三齿桴" src="http://localhost:4000/assets/images/liux.png">
+
+    </div>
     <h1>三齿桴</h1>
     <p>
-        <a href="./home" >文章</a>
+        <a href="./blog" >blog</a>
     </p>
     <p>
         <a href="https://github.com/lxcuso4" >Github</a>
@@ -110,6 +142,12 @@
     document.addEventListener('touchmove', function (e) {
         e.preventDefault()
     })
+    document.querySelectorAll('a').forEach(function(item) {
+      item.addEventListener('click',function() {
+        event.stopPropagation();
+      });
+    })
+
     var c = document.getElementsByTagName('canvas')[0],
         x = c.getContext('2d'),
         pr = window.devicePixelRatio || 1,
@@ -154,6 +192,5 @@
     i()
 </script>
 </body>
-
 
 </html>

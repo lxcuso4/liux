@@ -1,21 +1,23 @@
 ---
 layout: index
 ---
+
 <head>
- <style>
+ <style >
         html,
         body {
             overflow: hidden;
             margin: 0;
+            width: 100%;
         }
 
         body {
             font-family: 'Open Sans', 'Helvetica Neue', 'Hiragino Sans GB', 'LiHei Pro', Arial, sans-serif;
             color: #333;
-            font-size: 14px;
         }
 
         #wrapper {
+            width: 125px;
             position: absolute;
             text-align: center;
             top: 40%;
@@ -78,14 +80,25 @@ layout: index
         #wrapper>p>a:hover {
             color: #50b97d;
         }
+        #wrapper .head img{
+            width: 125px;
+            margin: 0 auto 25px;
+            border-radius: 100%;
+            transition: all 0.2s;
+            opacity: 1;
+        }
 
     </style>
 </head>
 <body>
 <div id="wrapper">
+    <div class="head">
+        <img class="selfie" alt="三齿桴" src="{{ site.url }}/assets/images/liux.png">
+
+    </div>
     <h1>三齿桴</h1>
     <p>
-        <a href="./home" >文章</a>
+        <a href="./blog" >blog</a>
     </p>
     <p>
         <a href="https://github.com/lxcuso4" >Github</a>
@@ -96,6 +109,12 @@ layout: index
     document.addEventListener('touchmove', function (e) {
         e.preventDefault()
     })
+    document.querySelectorAll('a').forEach(function(item) {
+      item.addEventListener('click',function() {
+        event.stopPropagation();
+      });
+    })
+
     var c = document.getElementsByTagName('canvas')[0],
         x = c.getContext('2d'),
         pr = window.devicePixelRatio || 1,

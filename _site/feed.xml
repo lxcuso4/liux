@@ -1,12 +1,12 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.8.5">Jekyll</generator><link href="http://localhost:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/" rel="alternate" type="text/html" /><updated>2019-02-24T10:03:46+08:00</updated><id>http://localhost:4000/feed.xml</id><title type="html">三齿桴</title><entry><title type="html">扩展vue的生命周期函数</title><link href="http://localhost:4000/frame/2018/12/26/%E6%89%A9%E5%B1%95vue%E7%94%9F%E5%91%BD%E5%91%A8%E6%9C%9F%E5%87%BD%E6%95%B0.html" rel="alternate" type="text/html" title="扩展vue的生命周期函数" /><published>2018-12-26T00:00:00+08:00</published><updated>2018-12-26T00:00:00+08:00</updated><id>http://localhost:4000/frame/2018/12/26/%E6%89%A9%E5%B1%95vue%E7%94%9F%E5%91%BD%E5%91%A8%E6%9C%9F%E5%87%BD%E6%95%B0</id><content type="html" xml:base="http://localhost:4000/frame/2018/12/26/%E6%89%A9%E5%B1%95vue%E7%94%9F%E5%91%BD%E5%91%A8%E6%9C%9F%E5%87%BD%E6%95%B0.html">&lt;h2 id=&quot;扩展在app中vue的生命周期函数&quot;&gt;扩展在App中vue的生命周期函数&lt;/h2&gt;
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.7.4">Jekyll</generator><link href="http://localhost:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/" rel="alternate" type="text/html" /><updated>2019-03-24T19:05:22+08:00</updated><id>http://localhost:4000/feed.xml</id><title type="html">三齿桴</title><subtitle>A blog about technology and stuff related</subtitle><entry><title type="html">扩展vue的生命周期函数</title><link href="http://localhost:4000/%E6%89%A9%E5%B1%95vue%E7%94%9F%E5%91%BD%E5%91%A8%E6%9C%9F%E5%87%BD%E6%95%B0/" rel="alternate" type="text/html" title="扩展vue的生命周期函数" /><published>2018-12-26T00:00:00+08:00</published><updated>2018-12-26T00:00:00+08:00</updated><id>http://localhost:4000/%E6%89%A9%E5%B1%95vue%E7%94%9F%E5%91%BD%E5%91%A8%E6%9C%9F%E5%87%BD%E6%95%B0</id><content type="html" xml:base="http://localhost:4000/%E6%89%A9%E5%B1%95vue%E7%94%9F%E5%91%BD%E5%91%A8%E6%9C%9F%E5%87%BD%E6%95%B0/">&lt;h2 id=&quot;扩展在app中vue的生命周期函数&quot;&gt;扩展在App中vue的生命周期函数&lt;/h2&gt;
 
 &lt;h4 id=&quot;需求场景&quot;&gt;需求场景&lt;/h4&gt;
 
 &lt;ul&gt;
   &lt;li&gt;在App中有时需要用户点击后退的时候显示挽留弹窗&lt;/li&gt;
-  &lt;li&gt;需要在用户点击关闭或者后退的时候数据上报，数据上报完成后再关闭webview&lt;/li&gt;
+  &lt;li&gt;需要在用户点击关闭或者后退的时候数据上报，数据上报完成后再关闭&lt;code class=&quot;highlighter-rouge&quot;&gt;webview&lt;/code&gt;&lt;/li&gt;
   &lt;li&gt;有些场景需要知道app退到后台&lt;/li&gt;
-  &lt;li&gt;有些场景需要知道webview 被显示到前台&lt;/li&gt;
+  &lt;li&gt;有些场景需要知道&lt;code class=&quot;highlighter-rouge&quot;&gt;webview&lt;/code&gt; 被显示到前台&lt;/li&gt;
 &lt;/ul&gt;
 
 &lt;h4 id=&quot;目前实现&quot;&gt;目前实现&lt;/h4&gt;
@@ -18,9 +18,9 @@
 &lt;/blockquote&gt;
 
 &lt;ul&gt;
-  &lt;li&gt;需要定义全局函数，将函数名称通过jsBridge给到端上&lt;/li&gt;
+  &lt;li&gt;需要定义全局函数，将函数名称通过&lt;code class=&quot;highlighter-rouge&quot;&gt;jsBridge&lt;/code&gt;给到端上&lt;/li&gt;
   &lt;li&gt;业务中需要判断环境&lt;/li&gt;
-  &lt;li&gt;每个需要的页面都需要独立的调用jsbridge，多个页面需要这个功能的话需要调用多次&lt;/li&gt;
+  &lt;li&gt;每个需要的页面都需要独立的调用&lt;code class=&quot;highlighter-rouge&quot;&gt;jsbridge&lt;/code&gt;，多个页面需要这个功能的话需要调用多次&lt;/li&gt;
 &lt;/ul&gt;
 
 &lt;h4 id=&quot;更好的实现方案&quot;&gt;更好的实现方案&lt;/h4&gt;
@@ -28,7 +28,7 @@
 &lt;p&gt;本质上用户点击后退、关闭、退到后台、显示到前台都是事件，如果将这些事件扩展为vue的生命周期函数，则在写业务的时候&lt;/p&gt;
 &lt;ul&gt;
   &lt;li&gt;不用关心与app的交互&lt;/li&gt;
-  &lt;li&gt;不用显式的调用jsBridge&lt;/li&gt;
+  &lt;li&gt;不用显式的调用&lt;code class=&quot;highlighter-rouge&quot;&gt;jsBridge&lt;/code&gt;&lt;/li&gt;
   &lt;li&gt;全局所有业务均会生效，不用写重复的逻辑&lt;/li&gt;
 &lt;/ul&gt;
 
@@ -45,7 +45,7 @@
 &lt;h4 id=&quot;使用文档&quot;&gt;使用文档&lt;/h4&gt;
 
 &lt;blockquote&gt;
-  &lt;p&gt;前置依赖vue router，只有引入vue router的当前激活路由上生效，如果是嵌套路由则子路由先生效&lt;/p&gt;
+  &lt;p&gt;前置依赖&lt;code class=&quot;highlighter-rouge&quot;&gt;vue&lt;/code&gt; &lt;code class=&quot;highlighter-rouge&quot;&gt;router&lt;/code&gt;，只有引入&lt;code class=&quot;highlighter-rouge&quot;&gt;vue&lt;/code&gt; &lt;code class=&quot;highlighter-rouge&quot;&gt;router&lt;/code&gt;的当前激活路由上生效，如果是嵌套路由则子路由先生效&lt;/p&gt;
 &lt;/blockquote&gt;
 
 &lt;table&gt;
@@ -60,28 +60,28 @@
   &lt;/thead&gt;
   &lt;tbody&gt;
     &lt;tr&gt;
-      &lt;td&gt;appBack&lt;/td&gt;
+      &lt;td&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;appBack&lt;/code&gt;&lt;/td&gt;
       &lt;td&gt;app后退按钮点击&lt;/td&gt;
       &lt;td&gt;vm 实例&lt;/td&gt;
       &lt;td&gt;执行点击后退的默认行为&lt;/td&gt;
       &lt;td&gt;当前事件对象&lt;/td&gt;
     &lt;/tr&gt;
     &lt;tr&gt;
-      &lt;td&gt;appClose&lt;/td&gt;
+      &lt;td&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;appClose&lt;/code&gt;&lt;/td&gt;
       &lt;td&gt;app关闭按钮点击&lt;/td&gt;
       &lt;td&gt;vm 实例&lt;/td&gt;
       &lt;td&gt;执行点击关闭的默认行为&lt;/td&gt;
       &lt;td&gt;当前事件对象&lt;/td&gt;
     &lt;/tr&gt;
     &lt;tr&gt;
-      &lt;td&gt;appPause&lt;/td&gt;
+      &lt;td&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;appPause&lt;/code&gt;&lt;/td&gt;
       &lt;td&gt;webview进入后台&lt;/td&gt;
       &lt;td&gt;vm 实例&lt;/td&gt;
       &lt;td&gt;无作用&lt;/td&gt;
       &lt;td&gt;当前事件对象&lt;/td&gt;
     &lt;/tr&gt;
     &lt;tr&gt;
-      &lt;td&gt;appResume&lt;/td&gt;
+      &lt;td&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;appResume&lt;/code&gt;&lt;/td&gt;
       &lt;td&gt;webview显示到页面&lt;/td&gt;
       &lt;td&gt;vm 实例&lt;/td&gt;
       &lt;td&gt;无作用&lt;/td&gt;
@@ -93,9 +93,9 @@
 &lt;h5 id=&quot;e为当前事件对象e下挂载两个方法&quot;&gt;e为当前事件对象，e下挂载两个方法&lt;/h5&gt;
 
 &lt;ul&gt;
-  &lt;li&gt;e.stopPropagation() //阻止事件被父路由捕获&lt;/li&gt;
-  &lt;li&gt;e.preventDefault() // 阻止默认行为，如果有默认行为的话&lt;/li&gt;
-  &lt;li&gt;return false // 可以阻止默认行为和冒泡&lt;/li&gt;
+  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;e.stopPropagation()&lt;/code&gt; //阻止事件被父路由捕获&lt;/li&gt;
+  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;e.preventDefault()&lt;/code&gt; // 阻止默认行为，如果有默认行为的话&lt;/li&gt;
+  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;return false&lt;/code&gt; // 可以阻止默认行为和冒泡&lt;/li&gt;
   &lt;li&gt;异步事件处理完成后再调用next 继续默认行为&lt;/li&gt;
 &lt;/ul&gt;
 
@@ -240,7 +240,7 @@ export  default  function  (router) {
     }
   }
 }
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;</content><author><name></name></author><summary type="html">扩展在App中vue的生命周期函数</summary></entry><entry><title type="html">mock数据平台</title><link href="http://localhost:4000/frame/2018/07/12/mock%E6%95%B0%E6%8D%AE%E5%B9%B3%E5%8F%B0.html" rel="alternate" type="text/html" title="mock数据平台" /><published>2018-07-12T00:00:00+08:00</published><updated>2018-07-12T00:00:00+08:00</updated><id>http://localhost:4000/frame/2018/07/12/mock%E6%95%B0%E6%8D%AE%E5%B9%B3%E5%8F%B0</id><content type="html" xml:base="http://localhost:4000/frame/2018/07/12/mock%E6%95%B0%E6%8D%AE%E5%B9%B3%E5%8F%B0.html">&lt;h3 id=&quot;mock功能介绍&quot;&gt;mock功能介绍&lt;/h3&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;</content><author><name>liux</name></author><category term="blog" /><summary type="html">扩展在App中vue的生命周期函数</summary></entry><entry><title type="html">mock数据平台</title><link href="http://localhost:4000/mock%E6%95%B0%E6%8D%AE%E5%B9%B3%E5%8F%B0/" rel="alternate" type="text/html" title="mock数据平台" /><published>2018-07-12T00:00:00+08:00</published><updated>2018-07-12T00:00:00+08:00</updated><id>http://localhost:4000/mock%E6%95%B0%E6%8D%AE%E5%B9%B3%E5%8F%B0</id><content type="html" xml:base="http://localhost:4000/mock%E6%95%B0%E6%8D%AE%E5%B9%B3%E5%8F%B0/">&lt;h3 id=&quot;mock功能介绍&quot;&gt;mock功能介绍&lt;/h3&gt;
 
 &lt;blockquote&gt;
   &lt;p&gt;mock是一个数据接口模拟系统支持json格式数据模拟&lt;/p&gt;
@@ -298,10 +298,10 @@ export  default  function  (router) {
 &lt;h4 id=&quot;最后&quot;&gt;最后&lt;/h4&gt;
 
 &lt;blockquote&gt;
-  &lt;p&gt;欢迎大家参与，或者提建议，issue，不合理的地方还望大神斧正😄&lt;/p&gt;
+  &lt;p&gt;不足之处，希望大家讨论指正。若有雷同，不胜荣幸😄&lt;/p&gt;
 &lt;/blockquote&gt;
 
-&lt;p&gt;&lt;a href=&quot;https://github.com/lxcuso4/mock&quot;&gt;服务端&lt;/a&gt;&lt;/p&gt;</content><author><name></name></author><summary type="html">mock功能介绍</summary></entry><entry><title type="html">跨页面通信</title><link href="http://localhost:4000/frame/2018/06/24/%E8%B7%A8%E9%A1%B5%E9%9D%A2%E9%80%9A%E4%BF%A1.html" rel="alternate" type="text/html" title="跨页面通信" /><published>2018-06-24T00:00:00+08:00</published><updated>2018-06-24T00:00:00+08:00</updated><id>http://localhost:4000/frame/2018/06/24/%E8%B7%A8%E9%A1%B5%E9%9D%A2%E9%80%9A%E4%BF%A1</id><content type="html" xml:base="http://localhost:4000/frame/2018/06/24/%E8%B7%A8%E9%A1%B5%E9%9D%A2%E9%80%9A%E4%BF%A1.html">&lt;h3 id=&quot;外呼系统交互方式&quot;&gt;外呼系统交互方式&lt;/h3&gt;
+&lt;p&gt;&lt;a href=&quot;https://github.com/lxcuso4/mock&quot;&gt;服务端&lt;/a&gt;&lt;/p&gt;</content><author><name>liux</name></author><category term="blog" /><summary type="html">mock功能介绍</summary></entry><entry><title type="html">跨页面通信</title><link href="http://localhost:4000/%E8%B7%A8%E9%A1%B5%E9%9D%A2%E9%80%9A%E4%BF%A1/" rel="alternate" type="text/html" title="跨页面通信" /><published>2018-06-24T00:00:00+08:00</published><updated>2018-06-24T00:00:00+08:00</updated><id>http://localhost:4000/%E8%B7%A8%E9%A1%B5%E9%9D%A2%E9%80%9A%E4%BF%A1</id><content type="html" xml:base="http://localhost:4000/%E8%B7%A8%E9%A1%B5%E9%9D%A2%E9%80%9A%E4%BF%A1/">&lt;h3 id=&quot;外呼系统交互方式&quot;&gt;外呼系统交互方式&lt;/h3&gt;
 
 &lt;blockquote&gt;
   &lt;p&gt;外呼系统不支持多标签页使用，而业务需要在打开的多个table页打电话，所以需要跨页面交互，交互流程图&lt;/p&gt;
@@ -342,7 +342,7 @@ export  default  function  (router) {
 
 &lt;blockquote&gt;
   &lt;p&gt;ps: listener不会监听到本页面setStorage的值，A页面的listener需要在B页面触发，（“页面”指的是浏览器的多窗口）&lt;/p&gt;
-&lt;/blockquote&gt;</content><author><name></name></author><summary type="html">外呼系统交互方式</summary></entry><entry><title type="html">前端业务组件化的实现</title><link href="http://localhost:4000/frame/2018/04/10/%E4%B8%9A%E5%8A%A1%E7%BB%84%E4%BB%B6%E5%8C%96-%E4%BA%8C.html" rel="alternate" type="text/html" title="前端业务组件化的实现" /><published>2018-04-10T00:00:00+08:00</published><updated>2018-04-10T00:00:00+08:00</updated><id>http://localhost:4000/frame/2018/04/10/%E4%B8%9A%E5%8A%A1%E7%BB%84%E4%BB%B6%E5%8C%96(%E4%BA%8C)</id><content type="html" xml:base="http://localhost:4000/frame/2018/04/10/%E4%B8%9A%E5%8A%A1%E7%BB%84%E4%BB%B6%E5%8C%96-%E4%BA%8C.html">&lt;h2 id=&quot;h5组件开发文档&quot;&gt;h5组件开发文档&lt;/h2&gt;
+&lt;/blockquote&gt;</content><author><name>liux</name></author><category term="blog" /><summary type="html">外呼系统交互方式</summary></entry><entry><title type="html">前端业务组件化的实现</title><link href="http://localhost:4000/%E4%B8%9A%E5%8A%A1%E7%BB%84%E4%BB%B6%E5%8C%96-%E4%BA%8C/" rel="alternate" type="text/html" title="前端业务组件化的实现" /><published>2018-04-10T00:00:00+08:00</published><updated>2018-04-10T00:00:00+08:00</updated><id>http://localhost:4000/%E4%B8%9A%E5%8A%A1%E7%BB%84%E4%BB%B6%E5%8C%96(%E4%BA%8C)</id><content type="html" xml:base="http://localhost:4000/%E4%B8%9A%E5%8A%A1%E7%BB%84%E4%BB%B6%E5%8C%96-%E4%BA%8C/">&lt;h2 id=&quot;h5组件开发文档&quot;&gt;h5组件开发文档&lt;/h2&gt;
 
 &lt;p&gt;&lt;a href=&quot;http://note.youdao.com/noteshare?id=5f36f4d1db9e2d633437ca4dabdaa330&quot;&gt;组件设计思路&lt;/a&gt;&lt;/p&gt;
 
@@ -819,7 +819,7 @@ export default {
   modules: Object.assign({}, nuccModule, creditCardStore)// 将组件store作为 业务modules
   }
 
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;</content><author><name></name></author><summary type="html">h5组件开发文档</summary></entry><entry><title type="html">前端业务组件化的思考</title><link href="http://localhost:4000/frame/2018/03/18/%E4%B8%9A%E5%8A%A1%E7%BB%84%E4%BB%B6%E5%8C%96-%E4%B8%80.html" rel="alternate" type="text/html" title="前端业务组件化的思考" /><published>2018-03-18T00:00:00+08:00</published><updated>2018-03-18T00:00:00+08:00</updated><id>http://localhost:4000/frame/2018/03/18/%E4%B8%9A%E5%8A%A1%E7%BB%84%E4%BB%B6%E5%8C%96(%E4%B8%80)</id><content type="html" xml:base="http://localhost:4000/frame/2018/03/18/%E4%B8%9A%E5%8A%A1%E7%BB%84%E4%BB%B6%E5%8C%96-%E4%B8%80.html">&lt;h3 id=&quot;前端业务组件分享&quot;&gt;前端业务组件分享&lt;/h3&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;</content><author><name>liux</name></author><category term="blog" /><summary type="html">h5组件开发文档</summary></entry><entry><title type="html">前端业务组件化的思考</title><link href="http://localhost:4000/%E4%B8%9A%E5%8A%A1%E7%BB%84%E4%BB%B6%E5%8C%96-%E4%B8%80/" rel="alternate" type="text/html" title="前端业务组件化的思考" /><published>2018-03-18T00:00:00+08:00</published><updated>2018-03-18T00:00:00+08:00</updated><id>http://localhost:4000/%E4%B8%9A%E5%8A%A1%E7%BB%84%E4%BB%B6%E5%8C%96(%E4%B8%80)</id><content type="html" xml:base="http://localhost:4000/%E4%B8%9A%E5%8A%A1%E7%BB%84%E4%BB%B6%E5%8C%96-%E4%B8%80/">&lt;h3 id=&quot;前端业务组件分享&quot;&gt;前端业务组件分享&lt;/h3&gt;
 
 &lt;h4 id=&quot;为什么要业务组件化&quot;&gt;为什么要业务组件化&lt;/h4&gt;
 
@@ -895,12 +895,12 @@ export default {
 &lt;h4 id=&quot;一些问题&quot;&gt;一些问题&lt;/h4&gt;
 
 &lt;blockquote&gt;
-  &lt;p&gt;目前组件都在compont仓库，所以业务引用的时候，业务引用A组件的老版本，B组件更新了，业务因为要更新B导致A也引用到最新的了&lt;/p&gt;
+  &lt;p&gt;目前组件都在component仓库，所以业务引用的时候，业务引用A组件的老版本，B组件更新了，业务因为要更新B导致A也引用到最新的了&lt;/p&gt;
 &lt;/blockquote&gt;
 
 &lt;ul&gt;
   &lt;li&gt;不同业务组件用一个独立的仓库，业务在引用的时候可以保证其引用版本不变&lt;/li&gt;
-&lt;/ul&gt;</content><author><name></name></author><summary type="html">前端业务组件分享</summary></entry><entry><title type="html">数组相邻和最大</title><link href="http://localhost:4000/algorithm/2017/04/12/%E6%95%B0%E7%BB%84%E7%9B%B8%E9%82%BB%E6%9C%80%E5%A4%A7.html" rel="alternate" type="text/html" title="数组相邻和最大" /><published>2017-04-12T00:00:00+08:00</published><updated>2017-04-12T00:00:00+08:00</updated><id>http://localhost:4000/algorithm/2017/04/12/%E6%95%B0%E7%BB%84%E7%9B%B8%E9%82%BB%E6%9C%80%E5%A4%A7</id><content type="html" xml:base="http://localhost:4000/algorithm/2017/04/12/%E6%95%B0%E7%BB%84%E7%9B%B8%E9%82%BB%E6%9C%80%E5%A4%A7.html">&lt;h3 id=&quot;数组相邻和最大&quot;&gt;数组相邻和最大&lt;/h3&gt;
+&lt;/ul&gt;</content><author><name>liux</name></author><category term="blog" /><summary type="html">前端业务组件分享</summary></entry><entry><title type="html">数组相邻和最大</title><link href="http://localhost:4000/%E6%95%B0%E7%BB%84%E7%9B%B8%E9%82%BB%E6%9C%80%E5%A4%A7/" rel="alternate" type="text/html" title="数组相邻和最大" /><published>2017-04-12T00:00:00+08:00</published><updated>2017-04-12T00:00:00+08:00</updated><id>http://localhost:4000/%E6%95%B0%E7%BB%84%E7%9B%B8%E9%82%BB%E6%9C%80%E5%A4%A7</id><content type="html" xml:base="http://localhost:4000/%E6%95%B0%E7%BB%84%E7%9B%B8%E9%82%BB%E6%9C%80%E5%A4%A7/">&lt;h3 id=&quot;数组相邻和最大&quot;&gt;数组相邻和最大&lt;/h3&gt;
 
 &lt;blockquote&gt;
   &lt;p&gt;求数组相邻元素之和最大&lt;/p&gt;
@@ -966,7 +966,7 @@ export default {
       return fn
     }
    add(1,2)(3)
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;</content><author><name></name></author><summary type="html">数组相邻和最大</summary></entry><entry><title type="html">三阶幻方</title><link href="http://localhost:4000/algorithm/2017/03/01/%E4%B8%89%E9%98%B6%E5%B9%BB%E6%96%B9.html" rel="alternate" type="text/html" title="三阶幻方" /><published>2017-03-01T00:00:00+08:00</published><updated>2017-03-01T00:00:00+08:00</updated><id>http://localhost:4000/algorithm/2017/03/01/%E4%B8%89%E9%98%B6%E5%B9%BB%E6%96%B9</id><content type="html" xml:base="http://localhost:4000/algorithm/2017/03/01/%E4%B8%89%E9%98%B6%E5%B9%BB%E6%96%B9.html">&lt;h3 id=&quot;三阶幻方&quot;&gt;三阶幻方&lt;/h3&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;</content><author><name>liux</name></author><category term="blog" /><summary type="html">数组相邻和最大</summary></entry><entry><title type="html">三阶幻方</title><link href="http://localhost:4000/%E4%B8%89%E9%98%B6%E5%B9%BB%E6%96%B9/" rel="alternate" type="text/html" title="三阶幻方" /><published>2017-03-01T00:00:00+08:00</published><updated>2017-03-01T00:00:00+08:00</updated><id>http://localhost:4000/%E4%B8%89%E9%98%B6%E5%B9%BB%E6%96%B9</id><content type="html" xml:base="http://localhost:4000/%E4%B8%89%E9%98%B6%E5%B9%BB%E6%96%B9/">&lt;h3 id=&quot;三阶幻方&quot;&gt;三阶幻方&lt;/h3&gt;
 &lt;blockquote&gt;
   &lt;p&gt;将1~9这9个不同整数填入一个3×3的表格，使得每行、每列以及每条对角线上的数字之和相同。&lt;/p&gt;
 &lt;/blockquote&gt;
@@ -1020,7 +1020,7 @@ export default {
     }
   }
   var re = magicSquare([1, 2, 3, 4, 5, 6, 7, 8, 9]);
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;</content><author><name></name></author><summary type="html">三阶幻方 将1~9这9个不同整数填入一个3×3的表格，使得每行、每列以及每条对角线上的数字之和相同。</summary></entry><entry><title type="html">穷举排列</title><link href="http://localhost:4000/algorithm/2017/02/18/%E7%A9%B7%E4%B8%BE%E6%8E%92%E5%88%97.html" rel="alternate" type="text/html" title="穷举排列" /><published>2017-02-18T00:00:00+08:00</published><updated>2017-02-18T00:00:00+08:00</updated><id>http://localhost:4000/algorithm/2017/02/18/%E7%A9%B7%E4%B8%BE%E6%8E%92%E5%88%97</id><content type="html" xml:base="http://localhost:4000/algorithm/2017/02/18/%E7%A9%B7%E4%B8%BE%E6%8E%92%E5%88%97.html">&lt;h3 id=&quot;穷举排列&quot;&gt;穷举排列&lt;/h3&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;</content><author><name>liux</name></author><category term="blog" /><summary type="html">三阶幻方 将1~9这9个不同整数填入一个3×3的表格，使得每行、每列以及每条对角线上的数字之和相同。</summary></entry><entry><title type="html">穷举排列</title><link href="http://localhost:4000/%E7%A9%B7%E4%B8%BE%E6%8E%92%E5%88%97/" rel="alternate" type="text/html" title="穷举排列" /><published>2017-02-18T00:00:00+08:00</published><updated>2017-02-18T00:00:00+08:00</updated><id>http://localhost:4000/%E7%A9%B7%E4%B8%BE%E6%8E%92%E5%88%97</id><content type="html" xml:base="http://localhost:4000/%E7%A9%B7%E4%B8%BE%E6%8E%92%E5%88%97/">&lt;h3 id=&quot;穷举排列&quot;&gt;穷举排列&lt;/h3&gt;
 &lt;blockquote&gt;
   &lt;p&gt;将数组中的元素排列组合&lt;/p&gt;
   &lt;h5 id=&quot;问题分析&quot;&gt;问题分析&lt;/h5&gt;
@@ -1049,9 +1049,9 @@ export default {
       return resulf;
     }
     log(getPermutations(['a','b','c','d']))
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;</content><author><name></name></author><summary type="html">穷举排列 将数组中的元素排列组合 问题分析 此问题和 N 皇后问题如出一辙，都是对 n 个元素进行排列组合，从中过滤出符合条件的排列 等价于将 length 个相同的数组排列组合，列号不能重复</summary></entry><entry><title type="html">N皇后问题</title><link href="http://localhost:4000/algorithm/2017/02/17/N%E7%9A%87%E5%90%8E%E9%97%AE%E9%A2%98.html" rel="alternate" type="text/html" title="N皇后问题" /><published>2017-02-17T00:00:00+08:00</published><updated>2017-02-17T00:00:00+08:00</updated><id>http://localhost:4000/algorithm/2017/02/17/N%E7%9A%87%E5%90%8E%E9%97%AE%E9%A2%98</id><content type="html" xml:base="http://localhost:4000/algorithm/2017/02/17/N%E7%9A%87%E5%90%8E%E9%97%AE%E9%A2%98.html">&lt;h3 id=&quot;n皇后问题&quot;&gt;N皇后问题&lt;/h3&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;</content><author><name>liux</name></author><category term="blog" /><summary type="html">穷举排列 将数组中的元素排列组合 问题分析 此问题和 N 皇后问题如出一辙，都是对 n 个元素进行排列组合，从中过滤出符合条件的排列 等价于将 length 个相同的数组排列组合，列号不能重复</summary></entry><entry><title type="html">N 皇后问题</title><link href="http://localhost:4000/N%E7%9A%87%E5%90%8E%E9%97%AE%E9%A2%98/" rel="alternate" type="text/html" title="N 皇后问题" /><published>2017-02-17T00:00:00+08:00</published><updated>2017-02-17T00:00:00+08:00</updated><id>http://localhost:4000/N%E7%9A%87%E5%90%8E%E9%97%AE%E9%A2%98</id><content type="html" xml:base="http://localhost:4000/N%E7%9A%87%E5%90%8E%E9%97%AE%E9%A2%98/">&lt;h3 id=&quot;n皇后问题&quot;&gt;N皇后问题&lt;/h3&gt;
 &lt;blockquote&gt;
-  &lt;p&gt;n*n的棋盘不在同一行，列，撇，捺，的摆法&lt;/p&gt;
+  &lt;p&gt;n*n的棋盘不在同一行，列，撇，捺，的摆法&lt;code class=&quot;highlighter-rouge&quot;&gt;abc&lt;/code&gt;&lt;/p&gt;
   &lt;h5 id=&quot;问题分析&quot;&gt;问题分析&lt;/h5&gt;
   &lt;ul&gt;
     &lt;li&gt;每行只有一个点&lt;/li&gt;
@@ -1100,4 +1100,4 @@ export default {
   console.time('t1');
   log(queen(4));
   console.timeEnd(&quot;t1&quot;);
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;</content><author><name></name></author><summary type="html">N皇后问题 n*n的棋盘不在同一行，列，撇，捺，的摆法 问题分析 每行只有一个点 遍历每行一个点的所有组合 帅选出符合条件的组</summary></entry></feed>
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;</content><author><name>liux</name></author><category term="blog" /><summary type="html">N皇后问题 n*n的棋盘不在同一行，列，撇，捺，的摆法abc 问题分析 每行只有一个点 遍历每行一个点的所有组合 帅选出符合条件的组</summary></entry></feed>

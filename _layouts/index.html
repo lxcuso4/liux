@@ -1,8 +1,23 @@
+
 <!DOCTYPE html>
-<html lang="{{ page.lang | default: site.lang | default: "zh" }}">
+<html lang="zh-CN">
+<head>
 
-  {%- include head.html -%}
+    <meta charset="utf-8">
+    <meta http-equiv=X-UA-Compatible content="IE=edge,chrome=1">
+    <meta name=viewport content="width=device-width, initial-scale=1">
 
-  {{ content }}
+    <meta name=description content="{{ site.bio }}">
+    <meta name=author content="{{ site.name }}">
 
+
+    {% seo %}
+
+    {% include favicon.html %}
+
+    <link rel="canonical" href="{{ site.url }}{{ page.url | replace:'index.html','' }}">
+
+
+</head>
+{{content}}
 </html>
